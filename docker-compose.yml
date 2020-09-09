@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  backend:
+    container_name: backend_container
+    build: ./backend
+    command: bash -c "python manage.py makemigrations &&
+                      python manage.py migrate &&
+                      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend/:/app
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+
+  db:
+    container_name: database_container
+    image: postgres:12
+    volumes:
+    - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+
+  frontend:
+    container_name: frontend_container
+    build: ./frontend
+    volumes:
+      - ./frontend/:/app
+      - /app/node_modules
+    command: npm run serve
+    ports:
+      - 8080:8080
+
+volumes:
+  postgres_data:
